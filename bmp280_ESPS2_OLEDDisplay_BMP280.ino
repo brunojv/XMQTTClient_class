@@ -27,7 +27,7 @@
 #include <TCA9554.h>
 #include "Adafruit_SHTC3.h"
 #include <DHT.h>
-#include "XMQTTCliente.h"
+#include "XMQTTClient.h"
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_ADDR 0x3C  // Common I2C address for OLED
@@ -50,7 +50,7 @@ const char* willMessage = "offline";
 TwoWire I2C_CH1 = TwoWire(0);
 TwoWire I2C_CH2 = TwoWire(1);
 DHT dht(DHTPIN,DHT11);
-XMQTTCliente mqtt(mqttServer, mqttPort, clientId, willTopic, willMessage,0,true);
+XMQTTClient mqtt(mqttServer, mqttPort, clientId, willTopic, willMessage,0,true);
 
 // Pass the custom I2C bus to the constructor
 Adafruit_BMP280 bmp_CH1(&I2C_CH1); // BMP280 Sensor  

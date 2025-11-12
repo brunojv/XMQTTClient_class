@@ -1,12 +1,12 @@
-#ifndef XMQTTCLIENTE_H
-#define XMQTTCLIENTE_H
+#ifndef XMQTTCLIENT_H
+#define XMQTTCLIENT_H
 
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-class XMQTTCliente {
+class XMQTTClient {
 public:
-  XMQTTCliente(const char* server, uint16_t port, const char* clientId,const char* willTopic, const char* willMessage, uint8_t willQoS = 1, bool willRetain = true);
+  XMQTTClient(const char* server, uint16_t port, const char* clientId,const char* willTopic, const char* willMessage, uint8_t willQoS = 1, bool willRetain = true);
   void begin(const char* ssid, const char* password);
   void loop();
   void setCallback(MQTT_CALLBACK_SIGNATURE);
@@ -14,7 +14,7 @@ public:
   void publish(const char* topic, const char* payload);
   bool isConnected();
   bool connect();
-  bool wifiConnected();  // ✅ Add this line to the public section
+  bool wifiConnected(); 
 
 
 private:

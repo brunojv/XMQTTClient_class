@@ -1,13 +1,13 @@
-#include "XMQTTCliente.h"
+#include "XMQTTClient.h"
 
-XMQTTCliente::XMQTTCliente(const char* server, uint16_t port, const char* clientId,
+XMQTTClient::XMQTTClient(const char* server, uint16_t port, const char* clientId,
                        const char* willTopic, const char* willMessage,
                        uint8_t willQoS, bool willRetain) : mqttClient(wifiClient), mqttServer(server), mqttPort(port), mqttClientId(clientId),
     willTopic(willTopic), willMessage(willMessage), willQoS(willQoS), willRetain(willRetain) {
   mqttClient.setServer(mqttServer, mqttPort);
 }
 
-void XMQTTCliente::begin(const char* ssid, const char* password) {
+void XMQTTClient::begin(const char* ssid, const char* password) {
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -17,38 +17,38 @@ void XMQTTCliente::begin(const char* ssid, const char* password) {
   Serial.println("\nWiFi connected");
 }
 
-bool XMQTTCliente::wifiConnected() {
+bool XMQTTClient::wifiConnected() {
   return WiFi.status() == WL_CONNECTED;
 }
 
-void XMQTTCliente::loop() {
+void XMQTTClient::loop() {
   if (!mqttClient.connected()) {
     reconnect();
   }
   mqttClient.loop();
 }
 
-void XMQTTCliente::setCallback(MQTT_CALLBACK_SIGNATURE) {
+void XMQTTClient::setCallback(MQTT_CALLBACK_SIGNATURE) {
   mqttClient.setCallback(callback);
 }
 
-void XMQTTCliente::subscribe(const char* topic) {
+void XMQTTClient::subscribe(const char* topic) {
   mqttClient.subscribe(topic);
 }
 
-void XMQTTCliente::publish(const char* topic, const char* payload) {
-  mqttClient.publish(topic, payload);
+void XMQTTClient::publish(const char* topic, const char* payload) {
+    mqttClient.publish(topic, payload);
 }
 
-bool XMQTTCliente::isConnected() {
+bool XMQTTClient::isConnected() {
   return mqttClient.connected();
 }
 
-bool XMQTTCliente::connect() {
+bool XMQTTClient::connect() {
   return mqttClient.connect(mqttClientId, willTopic, willQoS, willRetain, willMessage);
 }
 
-void XMQTTCliente::reconnect() {
+void XMQTTClient::reconnect() {
   while (!mqttClient.connected()) {
     Serial.print("Attempting MQTT connection...");
     if (mqttClient.connect(mqttClientId, willTopic, willQoS, willRetain, willMessage)) {
