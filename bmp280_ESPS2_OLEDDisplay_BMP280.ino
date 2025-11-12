@@ -203,7 +203,15 @@ void loop() {
 
   display.display();
   // MQTT publshing
-  mqtt.publish(const char *topicls, const char *payload); 
+  
+  mqtt.publish("mountoval/smallroom/temperatureSHTC3",String(temp_SHTC3.temperature).c_str());
+  mqtt.publish("mountoval/smallroom/humiditySHTC3", String(temp_SHTC3.temperature).c_str());
+
+  mqtt.publish("mountoval/smallroom/temperaureDHT11", String(temperature_DHT11).c_str());
+  mqtt.publish("mountoval/smallroom/humidityDHT11", String(humidity_DHT11).c_str());
+
+  mqtt.publish("mountoval/smallroom/temperatureBMP280", String(temp).c_str());
+  mqtt.publish("mountoval/smallroom/pressionBMP280", String(press).c_str()); 
 
   mqtt.loop();
   delay(2000);
