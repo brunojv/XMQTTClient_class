@@ -205,7 +205,7 @@ void loop() {
   // MQTT publshing
   
   mqtt.publish("mountoval/smallroom/temperatureSHTC3",String(temp_SHTC3.temperature).c_str());
-  mqtt.publish("mountoval/smallroom/humiditySHTC3", String(temp_SHTC3.temperature).c_str());
+  mqtt.publish("mountoval/smallroom/humiditySHTC3", String(humidity.relative_humidity).c_str());
 
   mqtt.publish("mountoval/smallroom/temperaureDHT11", String(temperature_DHT11).c_str());
   mqtt.publish("mountoval/smallroom/humidityDHT11", String(humidity_DHT11).c_str());
