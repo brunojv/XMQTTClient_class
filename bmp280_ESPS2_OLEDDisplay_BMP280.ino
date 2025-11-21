@@ -43,7 +43,7 @@ const char* ssid = "eir59539728";
 const char* password = "Radtel!TnY12671223";
 const char* mqttServer = "192.168.1.11";
 const uint16_t mqttPort = 1883;
-const char* clientId = "ESP32Client_SensorTesting";
+const char* clientId = "ESP32_Waveshare";
 const char* willTopic = "testing/sensors";
 const char* willMessage = "offline";
 
@@ -214,5 +214,5 @@ void loop() {
   mqtt.publish("mountoval/smallroom/pressionBMP280", String(press).c_str()); 
 
   mqtt.loop();
-  delay(2000);
+  delay(10000);
 }
