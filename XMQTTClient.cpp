@@ -21,10 +21,7 @@ bool XMQTTClient::wifiConnected() {
   return WiFi.status() == WL_CONNECTED;
 }
 
-void XMQTTClient::loop() {
-  if (!mqttClient.connected()) {
-    reconnect();
-  }
+void XMQTTClient::loop() {  
   mqttClient.loop();
 }
 
@@ -48,16 +45,17 @@ bool XMQTTClient::connect() {
   return mqttClient.connect(mqttClientId, willTopic, willQoS, willRetain, willMessage);
 }
 
-void XMQTTClient::reconnect() {
-  while (!mqttClient.connected()) {
+bool XMQTTClient::reconnect() {
+  if (!mqttClient.connected()) {
     Serial.print("Attempting MQTT connection...");
     if (mqttClient.connect(mqttClientId, willTopic, willQoS, willRetain, willMessage)) {
-      Serial.println("connected");
+      return true;
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000);
+      Serial.println(" will retry later");
+      return false;
+      
     }
   }
 }

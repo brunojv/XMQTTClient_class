@@ -39,13 +39,18 @@
 
 float temp;
 float press;
+String rxTemp;
+String rxHumedity;
+String mqttReceivedValue;
+String lastRxTemp;
+String lastRxHumedity;
 const char* ssid = "eir59539728";
 const char* password = "Radtel!TnY12671223";
 const char* mqttServer = "192.168.1.11";
 const uint16_t mqttPort = 1883;
 const char* clientId = "ESP32_Waveshare";
 const char* willTopic = "testing/sensors";
-const char* willMessage = "offline";
+const char* willMessage = "ESP Waveshare 8DO offline";
 
 TwoWire I2C_CH1 = TwoWire(0);
 TwoWire I2C_CH2 = TwoWire(1);
@@ -62,15 +67,44 @@ Adafruit_Sensor *bmp_temp = bmp_CH1.getTemperatureSensor();
 Adafruit_Sensor *bmp_pressure = bmp_CH1.getPressureSensor();
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3(); // SHTC3 Sensor 
 
+// Payload to global variable function
+ String payToVar (String subcTopic,String Rtopic,String mqttRecvValue){
+   
+   if (subcTopic == Rtopic) {
+     return mqttRecvValue;
+  }
+  else {
+    mqttRecvValue = " ";
+  } 
+}
+
 //MQTT Callback fucntion (Message reception), all time should be defined
+
 void callback(char* topic, byte* payload, unsigned int length) {
+  mqttReceivedValue = "";  // clear previous message
+    
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("]: ");
   for (unsigned int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+    mqttReceivedValue = mqttReceivedValue + (char)payload[i];
+    Serial.print((char)payload[i]);    
   }
+  mqttReceivedValue = mqttReceivedValue + '\0';
+  String topico = topic; 
   Serial.println();
+  rxTemp = payToVar("mountoval/outside/temperatureSHTC3",topico,mqttReceivedValue);
+  rxHumedity = payToVar("mountoval/outside/humiditySHTC3",topico,mqttReceivedValue);
+  if (rxTemp != " ") {
+    lastRxTemp = rxTemp;
+  } 
+  if  (rxHumedity != " ") {
+    lastRxHumedity = rxHumedity;
+  }
+  Serial.println("RX Outside Temp " + rxTemp);
+  Serial.println("RX Outside Humedity: " + rxHumedity);
+  Serial.println("Last Outside Temp " + lastRxTemp);
+  Serial.println("Last Outside Humedity: " + lastRxHumedity);
 }
 
 
@@ -136,7 +170,8 @@ void setup() {
   //MQTT Cmmunication 
   mqtt.begin(ssid, password);
   mqtt.setCallback(callback);
-  mqtt.subscribe("test/topic");
+  //mqtt.subscribe("mountoval/outside/temperatureSHTC3");
+  //mqtt.subscribe("mountoval/outside/humiditySHTC3");
   mqtt.publish("status/ESP32Client", "online");
 
 }
@@ -149,11 +184,17 @@ void loop() {
   press = pressure_event.pressure;
   float temperature_DHT11 = dht.readTemperature();  // Celsius
   float humidity_DHT11 = dht.readHumidity();        // %
-
+   
+  
   // Temperaure Alarm 
   if(temp <20) gpioExpander.write1(4,HIGH);
    else gpioExpander.write1(4,LOW);
   
+  
+  // MQTT publshing
+  static unsigned long lastPublish = 0;
+  if (millis() - lastPublish > 10000) {
+  lastPublish = millis();
   //Serial printing 
   Serial.print(F("Temperature = "));
   Serial.print(temp);
@@ -174,6 +215,7 @@ void loop() {
   Serial.print(" °C, Humi DHT11: ");
   Serial.print(humidity_DHT11);
   Serial.println(" %");
+  
   
   //Show on OLED display 
   display.clearDisplay();
@@ -201,9 +243,15 @@ void loop() {
   display.print(humidity_DHT11);
   display.println(" rH");
 
+  display.print("Out Temp: ");
+  display.println(lastRxTemp);
+  display.print("Out Humd: ");
+  display.println(lastRxHumedity);
+
   display.display();
-  // MQTT publshing
-  
+
+  mqtt.publish("status/ESP32Client", "still online");
+
   mqtt.publish("mountoval/smallroom/temperatureSHTC3",String(temp_SHTC3.temperature).c_str());
   mqtt.publish("mountoval/smallroom/humiditySHTC3", String(humidity.relative_humidity).c_str());
 
@@ -211,8 +259,20 @@ void loop() {
   mqtt.publish("mountoval/smallroom/humidityDHT11", String(humidity_DHT11).c_str());
 
   mqtt.publish("mountoval/smallroom/temperatureBMP280", String(temp).c_str());
-  mqtt.publish("mountoval/smallroom/pressionBMP280", String(press).c_str()); 
+  mqtt.publish("mountoval/smallroom/pressionBMP280", String(press).c_str());
+}  
 
-  mqtt.loop();
-  delay(10000);
+mqtt.loop();
+
+if (!mqtt.isConnected()) {
+  bool resultRecon = mqtt.reconnect();
+  Serial.println("connected");
+    // Re-subscribe after reconnect
+    if (resultRecon){
+    mqtt.subscribe("mountoval/outside/temperatureSHTC3");
+    mqtt.subscribe("mountoval/outside/humiditySHTC3");
+    Serial.println("All topics re-subcribed");
+    }
+}
+
 }

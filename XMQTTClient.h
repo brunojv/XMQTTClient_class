@@ -15,7 +15,8 @@ public:
   bool isConnected();
   bool connect();
   bool wifiConnected(); 
-
+  bool reconnect();
+  
 
 private:
   WiFiClient wifiClient;
@@ -28,7 +29,7 @@ private:
   uint8_t willQoS;
   bool willRetain;
 
-  void reconnect();
+  
 };
 
 #endif
